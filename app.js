@@ -1,37 +1,35 @@
-require('dotenv').config(); 
+require('dotenv').config();
 
 const express = require('express');
+const bodyParser = require('body-parser'); // Make sure you have this if using forms
+const path = require('path');
+
 const mongoConnect = require('./config/database').mongoConnect;
-const User = require('./models/user'); // Import User model here
-
-
+const User = require('./models/user');
 
 const app = express();
 
-// ... your middleware and routes ...
+app.set('view engine', 'ejs');
+app.set('views', 'views');
 
+// Middleware
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Middleware to find the user
 app.use((req, res, next) => {
-  User.findById('YOUR_HARDCODED_USER_ID_HERE')
-    .then(userData => {
-      // Create a class instance so we can use methods like addToCart and deleteItemFromCart
-      req.user = new User(userData.name, userData.email, userData.cart, userData._id);
+  User.findById('695b4cdeefe38078cdd855dd') // <--- YOUR REAL ID IS NOW HERE
+    .then(user => {
+      // We create a new User instance so we can use methods like addToCart
+      req.user = new User(user.name, user.email, user.cart, user._id);
       next();
     })
     .catch(err => console.log(err));
 });
 
+
 mongoConnect(() => {
-  // 1. Database is now connected!
-  
-  // 2. Create the user only now
-  const user = new User('Atif', 'atif@test.com');
-  user.save()
-    .then(() => {
-        // 3. Start the server only after user is saved (optional, but safe)
-        app.listen(3000, () => {
-            console.log("Server is running on port 3000");
-        });
-    })
-    .catch(err => console.log(err));
+  app.listen(3000, () => {
+    console.log("Server is running on port 3000");
+  });
 });
