@@ -10,8 +10,7 @@ const mongoConnect = (callback) => {
   MongoClient.connect(uri)
     .then(client => {
       console.log('Connected to MongoDB!');
-      // 2. Store the connection to your specific database in the variable
-      _db = client.db('my_shop_db'); // Replace 'my_shop_db' with your database name
+      _db = client.db('my_shop_db');
       callback();
     })
     .catch(err => {
