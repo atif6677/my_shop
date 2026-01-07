@@ -1,40 +1,53 @@
 require('dotenv').config();
-
+const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
-const path = require('path');
-
-const mongoConnect = require('./config/database').mongoConnect;
+const mongoose = require('mongoose');
 const User = require('./models/user');
 
-// Import Routes
-const shopRoutes = require('./routes/shop'); // <--- IMPORTED HERE
 
 const app = express();
 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-// Middleware
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Middleware to find the user
 app.use((req, res, next) => {
-  User.findById('695b4cdeefe38078cdd855dd') // <--- Your Real ID
+  // Ensure this ID matches the one in your database!
+  User.findById('695b4cdeefe38078cdd855dd') 
     .then(user => {
-      // Create a new User instance to use methods like addToCart/addOrder
-      req.user = new User(user.name, user.email, user.cart, user._id);
+      // Create user for testing if not found
+      if (!user) {
+         const newUser = new User({
+             name: 'Atif',
+             email: 'atif@test.com',
+             cart: { items: [] }
+         });
+         return newUser.save().then(result => {
+             req.user = result;
+             next();
+         });
+      }
+      req.user = user;
       next();
     })
     .catch(err => console.log(err));
 });
 
-// Use Routes
-app.use(shopRoutes); // <--- USED HERE
+app.use('/admin', adminRoutes);
+app.use(shopRoutes);
 
-mongoConnect(() => {
-  app.listen(3000, () => {
-    console.log("Server is running on port 3000");
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(result => {
+    console.log('Connected via Mongoose!');
+    app.listen(3000);
+  })
+  .catch(err => {
+    console.log(err);
   });
-});
