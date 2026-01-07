@@ -3,8 +3,7 @@ const path = require('path');
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const User = require('./models/user');
-
+const User = require('./models/user'); 
 
 const app = express();
 
@@ -18,10 +17,10 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
-  // Ensure this ID matches the one in your database!
-  User.findById('695b4cdeefe38078cdd855dd') 
+  // Replace with your actual User ID from MongoDB Compass/Atlas
+  User.findById('695b4cdeefe38078cdd855dd')
     .then(user => {
-      // Create user for testing if not found
+      // If no user found, create a dummy one (Optional)
       if (!user) {
          const newUser = new User({
              name: 'Atif',

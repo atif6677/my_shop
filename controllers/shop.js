@@ -74,11 +74,11 @@ exports.postCartDeleteProduct = (req, res, next) => {
     .catch(err => console.log(err));
 };
 
+// --- ORDER LOGIC ---
 exports.postOrder = (req, res, next) => {
   req.user
     .populate('cart.items.productId')
     .then(user => {
-      // Map cart items to the order structure
       const products = user.cart.items.map(i => {
         return { quantity: i.quantity, product: { ...i.productId._doc } };
       });
